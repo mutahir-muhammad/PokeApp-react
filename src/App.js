@@ -23,7 +23,7 @@ function App() {
       setNextPageUrl(res.data.next)
       setPrevPageUrl(res.data.previous)
       setPokemon(res.data.results.map(p => p.name))
-    })
+    }).catch(error => console.log(error.message))
 
     //cleanup function
     return () => cancel()
