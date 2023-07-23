@@ -1,16 +1,17 @@
-import React from 'react'
+import React from "react";
 
-export default function PokeList({ pokemon }) { 
+const Pokeinfo = ({ data }) => {
+   
     return (
         <>
         {
-            (!pokemon) ? "" : (
+            (!data) ? "" : (
                 <>
-                    <h1>{pokemon.name}</h1>
-                    <img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.id}.svg`} alt="" />
+                    <h1>{data.name}</h1>
+                    <img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${data.id}.svg`} alt="" />
                     <div className="abilities">
                         {
-                            pokemon && pokemon.abilities.map(poke=>{
+                            data.abilities.map(poke=>{
                                 return(
                                     <>
                                      <div className="group">
@@ -23,7 +24,7 @@ export default function PokeList({ pokemon }) {
                     </div>
                     <div className="base-stat">
                         {
-                            pokemon && pokemon.stats.map(poke=>{
+                            data.stats.map(poke=>{
                                 return(
                                     <>
                                         <h3>{poke.stat.name}:{poke.base_stat}</h3>
@@ -39,3 +40,4 @@ export default function PokeList({ pokemon }) {
         </>
     )
 }
+export default Pokeinfo

@@ -1,51 +1,62 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
-import PokeList from "./PokeList";
+import React from "react";
+import Card from "./Card";
+import Pokeinfo from "./Pokeinfo";
 import axios from "axios";
-import Pagination from "./Pagination";
+import { useState } from "react";
+import { useEffect } from "react";
+const Main=()=>{
+    const [pokeData,setPokeData]=useState([]);
+    const [loading,setLoading]=useState(true);
+    const [url,setUrl]=useState("https://pokeapi.co/api/v2/pokemon/")
+    const [nextUrl,setNextUrl]=useState();
+    const [prevUrl,setPrevUrl]=useState();
+    const [pokeDex,setPokeDex]=useState();
 
-function App() {
-  const [pokemon, setPokemon] = useState([])
-  const [currentPageUrl, setCurrentPageUrl] = useState("https://pokeapi.co/api/v2/pokemon")
-  const [nextPageUrl, setNextPageUrl] = useState()
-  const [prevPageUrl, setPrevPageUrl] = useState()
-  const [loading, setLoading] = useState(true)
+    const pokeFun=async()=>{
+        setLoading(true)
+        const res=await axios.get(url);
+        setNextUrl(res.data.next);
+        setPrevUrl(res.data.previous);
+        getPokemon(res.data.results)
+        setLoading(false)
+    }
+    const getPokemon=async(res)=>{
+       res.map(async(item)=>{
+          const result=await axios.get(item.url)
+          setPokeData(state=>{
+              state=[...state,result.data]
+              state.sort((a,b)=>a.id>b.id?1:-1)
+              return state;
+          })
+       })   
+    }
+    useEffect(()=>{
+        pokeFun();
+    },[url])
+    return(
+        <>
+            <div className="container">
+                <div className="left-content">
+                    <Card pokemon={pokeData} loading={loading} infoPokemon={poke=>setPokeDex(poke)}/>
+                    
+                    <div className="btn-group">
+                        {  prevUrl && <button onClick={()=>{
+                            setPokeData([])
+                           setUrl(prevUrl) 
+                        }}>Previous</button>}
 
-  //using axios to fetch data from PokeAPI
-  useEffect(() => {
-    setLoading(true)
-    let cancel; // variable declared to set axios cancelToken for cancelling extra reqs...
+                        { nextUrl && <button onClick={()=>{
+                            setPokeData([])
+                            setUrl(nextUrl)
+                        }}>Next</button>}
 
-    axios.get(currentPageUrl, {
-      cancelToken: new axios.CancelToken((c) => {cancel = c})
-    }).then(res => {
-      setLoading(false)
-      setNextPageUrl(res.data.next)
-      setPrevPageUrl(res.data.previous)
-      setPokemon(res.data.results.map(p => p.name))
-    }).catch(error => console.log(error.message))
-
-    //cleanup function
-    return () => cancel()
-  }, [currentPageUrl])
-
-  function goToNextPage(){
-    setCurrentPageUrl(nextPageUrl)
-  }
-
-  function goToPrevPage(){
-    setCurrentPageUrl(prevPageUrl)
-  }
-
-  if(loading) return "Loading Pokemon..."
-  return (
-    <>
-      <PokeList pokemon = { pokemon }/>
-      <Pagination goToNextPage = { nextPageUrl ? goToNextPage : null } 
-                  goToPrevPage = { prevPageUrl ? goToPrevPage : null }
-      />
-   </>
-  );
+                    </div>
+                </div>
+                <div className="right-content">
+                   <Pokeinfo data={pokeDex}/>
+                </div>
+            </div>
+        </>
+    )
 }
-
-export default App;
+export default Main;
